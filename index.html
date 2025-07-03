@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prestação de Contas - Alforge Segurança</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a5276;
+            --secondary-color: #3498db;
+            --light-color: #eaf2f8;
+            --accent-color: #2980b9;
+            --text-color: #2c3e50;
+            --white: #fff;
+            --border-color: #d6eaf8;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --total-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            margin-bottom: 5px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .current-date {
+            background-color: rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        
+        .form-section {
+            margin-bottom: 25px;
+            padding: 25px;
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+        
+        .form-section h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.95rem;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-color: #f8fafc;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .expenses-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .expenses-table th {
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            color: var(--white);
+            padding: 14px;
+            text-align: left;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .expenses-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            background-color: var(--white);
+        }
+        
+        .expenses-table tr:nth-child(even) td {
+            background-color: var(--light-color);
+        }
+        
+        .expenses-table tr:hover td {
+            background-color: #e1f0fa;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, var(--accent-color), var(--secondary-color));
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to right, var(--danger-color), #c0392b);
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, #2e7d32, #4caf50);
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(to right, #1b5e20, #2e7d32);
+        }
+        
+        .total-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--total-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .total-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .total-item {
+            background-color: var(--white);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+        
+        .total-item label {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        .total-item input {
+            background-color: transparent;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-color);
+            text-align: right;
+        }
+        
+        .total-item.total-expenses input {
+            color: var(--danger-color);
+        }
+        
+        .total-item.total-received input {
+            color: var(--success-color);
+        }
+        
+        .total-item.event-balance input {
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+        
+        .signature-section {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+        }
+        
+        .signature-box {
+            width: 45%;
+        }
+        
+        .signature-line {
+            border-top: 1px solid var(--text-color);
+            margin-top: 60px;
+            padding-top: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--accent-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .total-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .signature-section {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .signature-box {
+                width: 100%;
+            }
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+                margin: 0;
+                font-size: 12pt;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .form-section {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            header {
+                box-shadow: none;
+                margin-bottom: 20px;
+            }
+            
+            .btn, .remove-expense {
+                display: none !important;
+            }
+            
+            .expenses-table {
+                break-inside: avoid;
+            }
+            
+            .total-section {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="form-to-print">
+        <header>
+            <h1>PRESTAÇÃO DE CONTAS DE EVENTOS</h1>
+            <div class="company-name">ALFORGE SEGURANÇA PATRIMONIAL LTDA</div>
+            <div class="current-date">Data: <span id="current-date"></span></div>
+        </header>
+        
+        <form id="expense-form">
+            <div class="form-section">
+                <h2>DADOS DO COLABORADOR</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employee-name">Nome Completo</label>
+                        <input type="text" id="employee-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="branch">Filial</label>
+                        <select id="branch" required>
+                            <option value="">Selecione...</option>
+                            <option value="PERNAMBUCO">Pernambuco</option>
+                            <option value="BAHIA">Bahia</option>
+                            <option value="SERGIPE">Sergipe</option>
+                            <option value="ALAGOAS">Alagoas</option>
+                            <option value="OUTRA">Outra</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pix-key">Chave PIX (CPF)</label>
+                        <input type="text" id="pix-key" placeholder="000.000.000-00" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>DADOS DO EVENTO</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="event-name">Nome do Evento</label>
+                        <input type="text" id="event-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-date">Data do Evento</label>
+                        <input type="date" id="event-date" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="event-location">Local do Evento</label>
+                        <input type="text" id="event-location" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-manager">Gestor/Responsável</label>
+                        <input type="text" id="event-manager" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="event-description">Descrição do Evento</label>
+                    <textarea id="event-description" required></textarea>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>DESPESAS DO EVENTO</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expense-name">Nome do Item</label>
+                        <input type="text" id="expense-name" placeholder="Ex: Vigilantes, Alimentação">
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-type">Tipo de Despesa</label>
+                        <select id="expense-type">
+                            <option value="VIGILANTES">Vigilantes</option>
+                            <option value="APOIO_OPERACIONAL">Apoio Operacional</option>
+                            <option value="ALIMENTACAO">Alimentação</option>
+                            <option value="TRANSPORTE">Transporte</option>
+                            <option value="HOSPEDAGEM">Hospedagem</option>
+                            <option value="MATERIAL">Material</option>
+                            <option value="OUTROS">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-quantity">Quantidade</label>
+                        <input type="number" id="expense-quantity" min="1" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-unit-value">Valor Unitário (R$)</label>
+                        <input type="number" id="expense-unit-value" min="0" step="0.01" value="0.00">
+                    </div>
+                    <div class="form-group" style="align-self: flex-end;">
+                        <button type="button" class="btn" id="add-expense">Adicionar</button>
+                    </div>
+                </div>
+                
+                <table class="expenses-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>Quantidade</th>
+                            <th>Valor Unitário</th>
+                            <th>Valor Total</th>
+                            <th class="no-print">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenses-list">
+                        <!-- Despesas serão adicionadas aqui dinamicamente -->
+                    </tbody>
+                </table>
+                
+                <div class="total-section">
+                    <h3 style="margin-top: 0; color: var(--primary-color);">TOTAIS</h3>
+                    <div class="total-grid">
+                        <div class="total-item">
+                            <label>Valor Recebido via Banco:</label>
+                            <input type="number" id="received-bank" min="0" step="0.01" value="0.00">
+                        </div>
+                        <div class="total-item">
+                            <label>Valor Recebido em Espécie:</label>
+                            <input type="number" id="received-cash" min="0" step="0.01" value="0.00">
+                        </div>
+                        <div class="total-item total-received">
+                            <label>Total Recebido:</label>
+                            <input type="number" id="total-received" min="0" step="0.01" value="0.00" readonly>
+                        </div>
+                        <div class="total-item total-expenses">
+                            <label>Total de Despesas:</label>
+                            <input type="number" id="total-expenses" min="0" step="0.01" value="0.00" readonly>
+                        </div>
+                        <div class="total-item event-balance">
+                            <label>Saldo do Evento:</label>
+                            <input type="number" id="event-balance" min="0" step="0.01" value="0.00" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>OBSERVAÇÕES</h2>
+                <div class="form-group">
+                    <textarea id="observations"></textarea>
+                </div>
+            </div>
+            
+            <div class="signature-section">
+                <div class="signature-box">
+                    <div class="signature-line">Assinatura do Colaborador</div>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line">Assinatura do Gestor</div>
+                </div>
+            </div>
+            
+            <div class="form-row no-print" style="margin-top: 30px; justify-content: center; gap: 20px;">
+                <button type="button" class="btn" id="print-form">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5 1a2 2 0 0 0-2 2v1h10V3a2 2 0 0 0-2-2zm6 8H5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1"/>
+                        <path d="M0 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-1v-2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2H2a2 2 0 0 1-2-2zm2.5 1a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/>
+                    </svg>
+                    Imprimir Formulário
+                </button>
+                <button type="button" class="btn btn-success" id="export-excel">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 5a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5zm1 3a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1zm0 2a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1zm-2-5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm-2.5 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z"/>
+                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1"/>
+                    </svg>
+                    Exportar para Excel
+                </button>
+                <button type="reset" class="btn btn-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                    </svg>
+                    Limpar Formulário
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <p>Gerando arquivo, por favor aguarde...</p>
+    </div>
+
+    <script>
+        // Atualiza a data atual
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('pt-BR', options);
+        }
+        
+        // Calcula totais
+        function calculateTotals() {
+            const receivedBank = parseFloat(document.getElementById('received-bank').value) || 0;
+            const receivedCash = parseFloat(document.getElementById('received-cash').value) || 0;
+            const totalExpenses = parseFloat(document.getElementById('total-expenses').value) || 0;
+            
+            const totalReceived = receivedBank + receivedCash;
+            const eventBalance = totalReceived - totalExpenses;
+            
+            document.getElementById('total-received').value = totalReceived.toFixed(2);
+            document.getElementById('event-balance').value = eventBalance.toFixed(2);
+        }
+        
+        // Adiciona despesa à tabela
+        function addExpense() {
+            const name = document.getElementById('expense-name').value.trim();
+            const type = document.getElementById('expense-type').value;
+            const quantity = parseInt(document.getElementById('expense-quantity').value) || 0;
+            const unitValue = parseFloat(document.getElementById('expense-unit-value').value) || 0;
+            const totalValue = quantity * unitValue;
+            
+            if (!name) {
+                alert('Por favor, insira um nome para a despesa.');
+                return;
+            }
+            
+            if (quantity <= 0 || unitValue <= 0) {
+                alert('Por favor, insira valores válidos para quantidade e valor unitário.');
+                return;
+            }
+            
+            const expenseTypes = {
+                'VIGILANTES': 'Vigilantes',
+                'APOIO_OPERACIONAL': 'Apoio Operacional',
+                'ALIMENTACAO': 'Alimentação',
+                'TRANSPORTE': 'Transporte',
+                'HOSPEDAGEM': 'Hospedagem',
+                'MATERIAL': 'Material',
+                'OUTROS': 'Outros'
+            };
+            
+            const expenseRow = document.createElement('tr');
+            expenseRow.innerHTML = `
+                <td>${name}</td>
+                <td>${expenseTypes[type]}</td>
+                <td>${quantity}</td>
+                <td>R$ ${unitValue.toFixed(2)}</td>
+                <td>R$ ${totalValue.toFixed(2)}</td>
+                <td class="no-print"><button class="btn btn-danger remove-expense" type="button">Remover</button></td>
+            `;
+            
+            document.getElementById('expenses-list').appendChild(expenseRow);
+            
+            // Atualiza total de despesas
+            const currentTotal = parseFloat(document.getElementById('total-expenses').value) || 0;
+            document.getElementById('total-expenses').value = (currentTotal + totalValue).toFixed(2);
+            
+            // Limpa campos
+            document.getElementById('expense-name').value = '';
+            document.getElementById('expense-quantity').value = '1';
+            document.getElementById('expense-unit-value').value = '0.00';
+            
+            // Recalcula totais
+            calculateTotals();
+            
+            // Adiciona evento de remoção
+            expenseRow.querySelector('.remove-expense').addEventListener('click', function() {
+                const rowTotal = parseFloat(expenseRow.querySelector('td:nth-child(5)').textContent.replace('R$ ', ''));
+                const currentTotal = parseFloat(document.getElementById('total-expenses').value) || 0;
+                document.getElementById('total-expenses').value = (currentTotal - rowTotal).toFixed(2);
+                expenseRow.remove();
+                calculateTotals();
+            });
+        }
+        
+        // Função para imprimir o formulário
+        function printForm() {
+            // Esconde os botões antes de imprimir
+            const buttons = document.querySelectorAll('.no-print');
+            buttons.forEach(button => {
+                button.style.display = 'none';
+            });
+
+            // Abre a janela de impressão
+            window.print();
+
+            // Mostra os botões novamente após um pequeno delay
+            setTimeout(() => {
+                buttons.forEach(button => {
+                    button.style.display = '';
+                });
+            }, 500);
+        }
+        
+        // Função para exportar a tabela para Excel
+        function exportToExcel() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'flex';
+            
+            // Pequeno delay para mostrar o loading
+            setTimeout(() => {
+                try {
+                    // Obter os dados da tabela
+                    const table = document.getElementById('expenses-list');
+                    const rows = table.querySelectorAll('tr');
+                    
+                    // Preparar os dados para a planilha
+                    const data = [];
+                    
+                    // Adicionar cabeçalhos
+                    data.push(['Nome', 'Tipo', 'Quantidade', 'Valor Unitário (R$)', 'Valor Total (R$)']);
+                    
+                    // Adicionar linhas de dados
+                    rows.forEach(row => {
+                        const cols = row.querySelectorAll('td');
+                        if (cols.length >= 5) { // Garante que é uma linha de dados (não de ações)
+                            const rowData = [
+                                cols[0].textContent,
+                                cols[1].textContent,
+                                parseFloat(cols[2].textContent),
+                                parseFloat(cols[3].textContent.replace('R$ ', '')),
+                                parseFloat(cols[4].textContent.replace('R$ ', ''))
+                            ];
+                            data.push(rowData);
+                        }
+                    });
+                    
+                    // Adicionar metadados e totais
+                    data.push([], ['Dados do Evento']);
+                    
+                    // Adicionar informações do colaborador e evento
+                    const employeeName = document.getElementById('employee-name').value || 'Não informado';
+                    const branch = document.getElementById('branch').value || 'Não informado';
+                    const eventName = document.getElementById('event-name').value || 'Não informado';
+                    const eventDate = document.getElementById('event-date').value || 'Não informado';
+                    const eventLocation = document.getElementById('event-location').value || 'Não informado';
+                    
+                    data.push(['Colaborador:', employeeName]);
+                    data.push(['Filial:', branch]);
+                    data.push(['Evento:', eventName]);
+                    data.push(['Data:', eventDate]);
+                    data.push(['Local:', eventLocation]);
+                    
+                    // Adicionar totais
+                    data.push([]);
+                    data.push(['', '', '', 'Total de Despesas:', parseFloat(document.getElementById('total-expenses').value)]);
+                    data.push(['', '', '', 'Total Recebido:', parseFloat(document.getElementById('total-received').value)]);
+                    data.push(['', '', '', 'Saldo do Evento:', parseFloat(document.getElementById('event-balance').value)]);
+                    
+                    // Criar a planilha
+                    const ws = XLSX.utils.aoa_to_sheet(data);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Despesas");
+                    
+                    // Gerar o nome do arquivo
+                    const fileName = `Despesas_${employeeName}_${eventName}_${new Date().toISOString().slice(0, 10)}.xlsx`
+                        .replace(/[^a-zA-Z0-9_\-]/g, '.');
+                    
+                    // Exportar o arquivo
+                    XLSX.writeFile(wb, fileName);
+                } catch (error) {
+                    console.error('Erro ao exportar para Excel:', error);
+                    alert('Ocorreu um erro ao exportar para Excel. Por favor, tente novamente.');
+                } finally {
+                    loading.style.display = 'none';
+                }
+            }, 100);
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentDate();
+            
+            document.getElementById('add-expense').addEventListener('click', addExpense);
+            document.getElementById('print-form').addEventListener('click', printForm);
+            document.getElementById('export-excel').addEventListener('click', exportToExcel);
+            
+            document.getElementById('received-bank').addEventListener('change', calculateTotals);
+            document.getElementById('received-cash').addEventListener('change', calculateTotals);
+            
+            // Permite adicionar despesa pressionando Enter no campo de valor unitário
+            document.getElementById('expense-unit-value').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addExpense();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
